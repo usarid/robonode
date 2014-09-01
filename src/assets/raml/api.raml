@@ -1,0 +1,51 @@
+#%RAML 0.8
+title: RESTful API for Robotis Darwin Mini
+version: v1
+mediaType: application/json
+baseUri: http://robonode.ramlicio.us/api  # Change to http://localhost:3000/api 
+
+/robots:
+  /{robotId}:
+    uriParameters:
+      robotId:
+        description: |
+          The last 4 characters of the bluetooth address of your Robotis device.
+          You can see its address on a Mac if you hold down 'option' while viewing 
+          the menu bar's bluetooth dropdown.
+          e.g. if the address is 'b8-63-bc-00-12-16' your robotId is 1216
+    /commands:
+      get:
+        description: |
+          Returns information about the commands in the motion file currently loaded into the robot.
+        responses:
+          200:
+      post:
+        description: |
+          Execute a command, and return when the robot has finished.
+          You can submit either the number of the command or its name,
+          based on the motion file currently loaded into the robot.
+          If you submit both, only the number is used.
+        body:
+          example: |
+            { "number": 3, "name": "Sit" }
+        responses:
+          204:
+    /state:
+      get:
+        description: |
+          DOES NOT WORK PROPERLY YET.
+          It only logs the data it sees to the console.
+          See http://support.robotis.com/en/product/dynamixel_pro/dynamixelpro/control_table.htm
+        queryParameters:
+          address:
+            description: The address in the control table.
+            type: number
+            required: true
+            example: 610
+          bytesToRead:
+            description: How many bytes to read starting from that address.
+            type: number
+            required: true
+            example: 1
+        responses:
+          200:
