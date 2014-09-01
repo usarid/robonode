@@ -9,29 +9,47 @@ var INSTRUCTION_READ = '02';
 var INSTRUCTION_WRITE = '03';
 var ADDRESS_EXECUTE = '4200'; // 66 decimal expressed in hex, low byte first; "66 is the address value that states the motion will be executed"
 
+var ROBOT_NAME_REGEXP = /Robotis/i;
+
+exports.findRobots = function findRobots(onFound)
+{
+    btSerial.listPairedDevices(function (pairedDevices)
+    {
+        var robotDevices = pairedDevices.filter(function (device) 
+        { 
+            return (device.name.search(ROBOT_NAME_REGEXP) != -1);
+        });
+
+        robotDevices.forEach(function (device)
+        {
+            device.robotId = device.address.substr(-5).replace(/\-/g, '');
+        });
+
+        onFound(null, robotDevices);
+    });
+};
+
 // Find the Robotis device among the paired devices, and connect to it
 // robotId should be the last 4 characters of the bluetooth address of your Robotis device
 // You can see its address on a Mac if you hold down 'option' while viewing the menu bar's bluetooth dropdown
 // e.g. if the address is 'b8-63-bc-00-12-16' your robotId is 1216
 exports.connect = function connect(robotId, onConnect)
 {
-    var dashedRobotId = robotId.substr(0, 2) + '-' + robotId.substr(2, 2);
-    btSerial.listPairedDevices(function (pairedDevices)
+    findRobots(function onFound(err, robots)
     {
-        var robotDevices = pairedDevices.filter(function (device) 
-        { 
-            return (device.name.search(/Robotis/i) != -1) &&
-                   (device.address.substr(-5) == dashedRobotId);
+        var candidates = robots.filter(function (r)
+        {
+            return (r.robotId == robotId);
         });
 
-        if (robotDevices.length === 0)
+        if (candidates.length === 0)
         {
             onConnect('No robots found!');
         }
         else
         {
-            if (robotDevices.length > 1) console.info('Found ' + robotDevices.length + ' robots; using the first');
-            robot = robotDevices[0];
+            if (candidates.length > 1) console.info('Found ' + candidates.length + ' robots; using the first');
+            robot = candidates[0];
             channel = robot.services[0].channel;
             connectOne(robot.address, channel, onConnect);
         }

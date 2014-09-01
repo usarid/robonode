@@ -29,6 +29,24 @@ api = osprey.create('/api', app,
 });
 
 // GET information about the commands
+api.get('/robots', function (req, res) 
+{
+    robot.findRobots(function onFound(err, robotDevices)
+    {
+        if (err)
+        {
+            res.status(500).send({ error: err });
+        }
+        else
+        {
+            res.send(robotDevices);
+        }
+    });
+});
+
+// GET information about the commands
+// TODO: One day we'll need to ask the robot for its motion file
+// instead of assuming all robots use the assumedMotionFile.mtnx bundled here.
 api.get('/robots/:robotId/commands', function (req, res) 
 {
     res.send(motionData);
