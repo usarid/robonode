@@ -2,12 +2,13 @@
 title: RESTful API for Robotis Darwin Mini
 version: v1
 mediaType: application/json
-baseUri: http://robonode.ramlicio.us/api  # Change to http://localhost:3000/api 
+baseUri: http://localhost:3000/api 
 
 /robots:
   get:
     description: |
       Retrieve information about any robots paired with your computer.
+      Useful to see what's your robotId.
     responses:
       200:
   /{robotId}:
