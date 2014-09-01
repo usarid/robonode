@@ -37,14 +37,48 @@ you might choose to do the same so your RAML file is constant._
 Usage
 -----
 
+To start the server, simply type
+
     grunt
 
 or alternatively
 
     node src/app.js
 
-Your API is available at http://localhost:3000/api and a console is available
+Your API is available at http://localhost:3000/api and an API console is available
 at http://localhost:3000/api/console . The API definition in RAML is available
 at http://localhost:3000/api/api.raml -- see http://raml.org for more information.
 
+You can now issue individual commands to your robot using the API Console or any other
+tool such as the API Notebook, or even just curl from the commandline:
+
+    curl http://localhost:3000/api/robots
+
+    [
+      {
+        "name": "ROBOTIS BT-210",
+        "address": "b8-63-bc-00-12-16",
+        "services": [
+          {
+            "channel": 1,
+            "name": "SPP Dev"
+          }
+        ],
+        "robotId": "1216"
+      }
+    ]
+
+    curl -H "Content-Type: application/json" -d '{ "name": "Sit" }' \ 
+         http://localhost:3000/api/robots/1216/commands
+
+Note that you must pair with the robot(s) but you need not connect with them; this server
+will connect for you. So the first command you issue may take a bit longer,
+while establishing the connection, but subsequent ones will reuse the connection if it's
+still open. Occasionally, you might need to restart the server if it thinks it's still
+connected to the robots but they think otherwise.
+
+The API commands are designed to return only once the robot has finished executing the command,
+which they accomplish by calculating how much time is allotted for the command in the motion file.
+So if you want to string multiple commands together, make sure you wait for each response to return
+before issuing the subsequent request.
 

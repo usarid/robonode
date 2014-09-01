@@ -11,7 +11,7 @@ var ADDRESS_EXECUTE = '4200'; // 66 decimal expressed in hex, low byte first; "6
 
 var ROBOT_NAME_REGEXP = /Robotis/i;
 
-exports.findRobots = function findRobots(onFound)
+exports.findRobots = findRobots = function findRobots(onFound)
 {
     btSerial.listPairedDevices(function (pairedDevices)
     {
