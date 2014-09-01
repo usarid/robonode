@@ -61,7 +61,7 @@ api.post('/robots/:robotId/commands', function (req, res)
         var robotId = req.params.robotId;
         var commandNumber = req.param('number');
         var commandName = req.param('name');
-        var normalizedCommandName = normalizeCommandName(commandName);
+        var normalizedCommandName = commandName ? normalizeCommandName(commandName) : null;
 
         if (commandName && !commandNumber)
         {

@@ -32,7 +32,7 @@ Change the value of `baseUri` in the src/assets/raml/api.raml file to be
 `http://robo123.ngrok.com/api` and now that's the internet entrypoint to your API!
 
 _I've signed up and paid a bit to [ngrok](http://ngrok.com) to reserve my own domain; 
-you might choose to do the same so your RAML file is constant._
+you might choose to do the same so your RAML file doesn't have to change often._
 
 Usage
 -----
@@ -81,4 +81,19 @@ The API commands are designed to return only once the robot has finished executi
 which they accomplish by calculating how much time is allotted for the command in the motion file.
 So if you want to string multiple commands together, make sure you wait for each response to return
 before issuing the subsequent request.
+
+Known Limitations
+-----------------
+
+The API for reading state data (e.g. whether the robot is moving) isn't finished yet and doesn't work.
+
+I've not yet tested it with multiple robots, but I will soon.
+
+Some aspects are still a bit mysterious to me, so I'm guessing a bit in calculating
+how long commands should take, or simply assuming (because I've been told by someone at Robotis)
+that the Dynamixel ID should be 200 and that the code for executing a motion is 66.
+
+Rather than reading the robot's current motion file, somehow, I'm assuming it has the same
+motion file as the one it comes with, specifically http://support.robotis.com/en/baggage_files/darwinmini/darwin_mini_exemple_en.zip , which I've bundled with this repo, and
+which I read when the server starts up to calculate motions, timings, etc.
 
