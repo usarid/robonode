@@ -1,4 +1,5 @@
 var express = require('express');
+var cors = require('cors'); 
 var path = require('path');
 var osprey = require('osprey');
 
@@ -11,6 +12,10 @@ app.use(express.bodyParser());
 app.use(express.methodOverride());
 app.use(express.compress());
 app.use(express.logger('dev'));
+
+// Enable CORS, including preflighting
+app.use(cors());
+app.options('*', cors());
 
 app.set('port', process.env.PORT || 3000);
 
