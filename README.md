@@ -68,8 +68,9 @@ tool such as the API Notebook, or even just curl from the commandline:
       }
     ]
 
-    curl -H "Content-Type: application/json" -d '{ "name": "Sit" }' \ 
-         http://localhost:3000/api/robots/1216/commands
+Choose the `robotId` for the robot you'd like to control, and then issue commands to it: 
+
+    curl -H "Content-Type: application/json" -d '{ "name": "Sit" }' http://localhost:3000/api/robots/1216/commands
 
 Note that you must pair with the robot(s) but you need not connect with them; this server
 will connect for you. So the first command you issue may take a bit longer,
@@ -77,7 +78,7 @@ while establishing the connection, but subsequent ones will reuse the connection
 still open. Occasionally, you might need to restart the server if it thinks it's still
 connected to the robots but they think otherwise.
 
-The API commands are designed to return only once the robot has finished executing the command,
+The API commands are designed to return, by default, only once the robot has finished executing the command,
 which they accomplish by calculating how much time is allotted for the command in the motion file.
 So if you want to string multiple commands together, make sure you wait for each response to return
 before issuing the subsequent request.
@@ -87,13 +88,13 @@ Known Limitations
 
 The API for reading state data (e.g. whether the robot is moving) isn't finished yet and doesn't work.
 
-I've not yet tested it with multiple robots, but I will soon.
-
 Some aspects are still a bit mysterious to me, so I'm guessing a bit in calculating
 how long commands should take, or simply assuming (because I've been told by someone at Robotis)
 that the Dynamixel ID should be 200 and that the code for executing a motion is 66.
 
 Rather than reading the robot's current motion file, somehow, I'm assuming it has the same
-motion file as the one it comes with, specifically http://support.robotis.com/en/baggage_files/darwinmini/darwin_mini_exemple_en.zip , which I've bundled with this repo, and
-which I read when the server starts up to calculate motions, timings, etc.
+motion file as the one it comes with out of the box, specifically 
+http://support.robotis.com/en/baggage_files/darwinmini/darwin_mini_exemple_en.zip, 
+which I've bundled with this repo, and which I read when the server starts up 
+to calculate motions, timings, etc.
 

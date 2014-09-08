@@ -1,4 +1,3 @@
-var btSerial = new (require('bluetooth-serial-port')).BluetoothSerialPort();
 var addCRC = require('./addCRC');
 
 var PREFIX = 'fffffd00'; // Defined by http://support.robotis.com/en/techsupport_eng.htm#product/dynamixel_pro/communication.htm
@@ -13,6 +12,7 @@ var ROBOT_NAME_REGEXP = /Robotis/i;
 
 exports.findRobots = findRobots = function findRobots(onFound)
 {
+    var btSerial = new (require('bluetooth-serial-port')).BluetoothSerialPort();
     btSerial.listPairedDevices(function (pairedDevices)
     {
         var robotDevices = pairedDevices.filter(function (device) 
@@ -28,6 +28,17 @@ exports.findRobots = findRobots = function findRobots(onFound)
         onFound(null, robotDevices);
     });
 };
+
+// Setup a little registry of btSerial ports, one per robot
+var robotPorts = {};
+function getPort(robotId)
+{
+    if (!(robotId in robotPorts))
+    {
+        robotPorts[robotId] = new (require('bluetooth-serial-port')).BluetoothSerialPort();
+    }
+    return robotPorts[robotId];
+}
 
 // Find the Robotis device among the paired devices, and connect to it
 // robotId should be the last 4 characters of the bluetooth address of your Robotis device
@@ -51,18 +62,19 @@ exports.connect = function connect(robotId, onConnect)
             if (candidates.length > 1) console.info('Found ' + candidates.length + ' robots; using the first');
             robot = candidates[0];
             channel = robot.services[0].channel;
-            connectOne(robot.address, channel, onConnect);
+            var btSerial = getPort(robotId);
+            connectOne(btSerial, robot.address, channel, onConnect);
         }
     });
 };
 
 // Actually connect to the device, on its address and channel
-function connectOne(address, channel, onConnect)
+function connectOne(btSerial, address, channel, onConnect)
 {
     if (btSerial.isOpen())
     {
         console.info('already connected');
-        onConnect();
+        onConnect(null, btSerial);
     }
     else
     {
@@ -71,7 +83,7 @@ function connectOne(address, channel, onConnect)
         btSerial.connect(address, channel, function() 
         {
             console.info('connected');
-            onConnect();
+            onConnect(null, btSerial);
 
             // Log any returning data:
             btSerial.on('data', function (buffer) 
@@ -81,8 +93,9 @@ function connectOne(address, channel, onConnect)
 
         }, function () 
         {
-            onConnect('cannot connect');
+            onConnect('cannot connect', btSerial);
         });
+        
     }
 }
 
@@ -91,12 +104,12 @@ function toHexLowHigh(number)
     var hex = (number + 0x10000).toString(16).substr(-4); // e.g. '0262'
     hexHigh = hex.substr(0, 2);
     hexLow  = hex.substr(2, 2);
-    return hexLow + hexHigh;
+    return hexLow + hexHigh; // e.g. '6202'
 }
 
 // write a command to the bluetooth port
 // command should be a number from 1-255
-exports.sendCommand = function sendCommand(command, onSent)
+exports.sendCommand = function sendCommand(btSerial, command, onSent)
 {
     var hexCommand = toHexLowHigh(command);
 
@@ -108,13 +121,13 @@ exports.sendCommand = function sendCommand(command, onSent)
     {
         console.info('sent');
         if (err) console.error(err);
-        if (onSent) onSent(err);
+        if (onSent) onSent(err, btSerial);
     });
 };
 
 // read a state from the bluetooth port
 // address and lengthInBytes should be numbers
-exports.readState = function readState(address, lengthInBytes, onSent)
+exports.readState = function readState(btSerial, address, lengthInBytes, onSent)
 {
     var addr16 = toHexLowHigh(address);
     var len16  = toHexLowHigh(lengthInBytes);
@@ -127,6 +140,6 @@ exports.readState = function readState(address, lengthInBytes, onSent)
     {
         console.info('sent');
         if (err) console.error(err);
-        if (onSent) onSent(err);
+        if (onSent) onSent(err, btSerial);
     });
 };

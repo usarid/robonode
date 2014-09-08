@@ -67,6 +67,8 @@ api.post('/robots/:robotId/commands', function (req, res)
         var commandNumber = req.param('number');
         var commandName = req.param('name');
         var normalizedCommandName = commandName ? normalizeCommandName(commandName) : null;
+        var async = req.param('async') || false;
+
 
         if (commandName && !commandNumber)
         {
@@ -82,7 +84,7 @@ api.post('/robots/:robotId/commands', function (req, res)
         {
             var command = motionData.flowsByNumber[commandNumber];
             console.info('Executing command: ' + command.name + ' for ' + command.time + 'ms');
-            robot.connect(robotId, function onConnect(err)
+            robot.connect(robotId, function onConnect(err, btSerial)
             {
                 if (err)
                 {
@@ -90,8 +92,21 @@ api.post('/robots/:robotId/commands', function (req, res)
                 }
                 else
                 {
-                    robot.sendCommand(Number(commandNumber));
-                    setTimeout(function () { res.status(202).send(''); }, command.time);
+                    robot.sendCommand(btSerial, Number(commandNumber));
+                    if (async) // respond immediately, with the execution time
+                    {
+                        console.log('Command sent, not waiting for execution to finish')
+                        res.status(202).send({ executionTimeInMs: command.time });
+                    }
+                    else       // respond only after the execution time has passed
+                    {
+                        setTimeout(function () 
+                        { 
+                            console.log('Command sent, finished waiting for execution');
+                            res.status(204).send(''); 
+                        }, command.time);
+                    }
+                    
                 }
             });
         }
@@ -106,7 +121,6 @@ api.post('/robots/:robotId/commands', function (req, res)
         console.error(e); 
         res.status(500).send(''); 
     }
-
 });
 
 // GET the state of the robot by reading the control table at a certain address
@@ -118,7 +132,7 @@ api.get('/robots/:robotId/state', function (req, res)
     var address = Number(req.param('address'));
     var bytesToRead = Number(req.param('bytesToRead'));
     console.info('Reading state: ' + [ address, bytesToRead ]);
-    robot.connect(robotId, function onConnect(err)
+    robot.connect(robotId, function onConnect(err, btSerial)
     {
         if (err)
         {
@@ -126,7 +140,7 @@ api.get('/robots/:robotId/state', function (req, res)
         }
         else
         {
-            robot.readState(address, bytesToRead);
+            robot.readState(btSerial, address, bytesToRead);
             res.status(202).send('');
         }
     });
