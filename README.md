@@ -5,10 +5,12 @@ A RAML-described, node-based RESTful API for the Robotis DARWIN-MINI robot
 
 It uses RAML, node.js, the Express framework, and Osprey to describe and implement the API.
 
+It also uses the excellent [node bluetooth library](https://github.com/eelcocramer/node-bluetooth-serial-port). 
+
 The flow is simple: start the server, which then listens for HTTP requests, and 
 issues the appropriate binary commands over bluetooth to the robot.
 
-Only tested on a Mac running the Mavericks version of OSX and a single bluetooth-paired DARWIN-MINI.
+Only tested on a Mac running the Mavericks version of OSX.
 
 Installation
 ------------
@@ -90,7 +92,7 @@ The API for reading state data (e.g. whether the robot is moving) isn't finished
 
 Some aspects are still a bit mysterious to me, so I'm guessing a bit in calculating
 how long commands should take, or simply assuming (because I've been told by someone at Robotis)
-that the Dynamixel ID should be 200 and that the code for executing a motion is 66.
+that the Dynamixel ID should be 200 (decimal) and that the code for executing a motion is 66 (decimal).
 
 Rather than reading the robot's current motion file, somehow, I'm assuming it has the same
 motion file as the one it comes with out of the box, specifically 
